@@ -3,13 +3,14 @@ pub fn part_1() -> usize {
     let contents = read_to_string("input/day-1.txt").unwrap();
     contents
         .lines()
-        .map(|x| {
-            x.chars()
+        .map(|line| {
+            line.chars()
                 .find(|y| y.is_ascii_digit())
                 .map(|y| y as u8 - b'0')
                 .unwrap() as usize
                 * 10
-                + x.chars()
+                + line
+                    .chars()
                     .rfind(|y| y.is_ascii_digit())
                     .map(|y| y as u8 - b'0')
                     .unwrap() as usize
