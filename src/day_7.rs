@@ -18,88 +18,57 @@ pub fn part_1() -> usize {
             )
         })
         .collect::<Vec<(Box<[char]>, usize)>>();
-    pairs.sort_unstable_by(|a, b| {
-        let mut k_map: HashMap<char, usize> = HashMap::with_capacity(17);
-        for char in a.0.iter() {
-            k_map.entry(*char).and_modify(|x| *x += 1).or_insert(1);
-        }
-        let values: Vec<usize> = k_map.into_values().collect();
+    pairs.sort_unstable_by(|(a, _), (b, _)| {
         use HandType as H;
-        let a_rank: HandType = match values {
-            _ if values.contains(&5) => H::Five,
-            _ if values.contains(&4) => H::Four,
-            _ if values.contains(&3) => {
-                if values.contains(&2) {
-                    H::FullHouse
-                } else {
-                    H::Three
-                }
+        let mut hands: [H; 2] = [H::High, H::High];
+        for (k, v) in [a, b].iter().enumerate() {
+            let mut k_map: HashMap<char, usize> = HashMap::with_capacity(23);
+            for char in v.iter() {
+                k_map.entry(*char).and_modify(|x| *x += 1).or_insert(1);
             }
-            _ if values.iter().filter(|&x| *x == 2).count() == 2 => H::Two,
-            _ if values.contains(&2) => H::One,
-            _ => H::High,
-        };
-
-        k_map = HashMap::with_capacity(17);
-
-        for char in b.0.iter() {
-            k_map.entry(*char).and_modify(|x| *x += 1).or_insert(1);
+            let values: Vec<usize> = k_map.into_values().collect();
+            hands[k] = match values {
+                _ if values.contains(&5) => H::Five,
+                _ if values.contains(&4) => H::Four,
+                _ if values.contains(&3) => {
+                    if values.contains(&2) {
+                        H::FullHouse
+                    } else {
+                        H::Three
+                    }
+                }
+                _ if values.iter().filter(|&x| *x == 2).count() == 2 => H::Two,
+                _ if values.contains(&2) => H::One,
+                _ => H::High,
+            };
         }
 
-        let values: Vec<usize> = k_map.into_values().collect();
-        let b_rank: HandType = match values {
-            _ if values.contains(&5) => H::Five,
-            _ if values.contains(&4) => H::Four,
-            _ if values.contains(&3) => {
-                if values.contains(&2) {
-                    H::FullHouse
-                } else {
-                    H::Three
-                }
-            }
-            _ if values.iter().filter(|&x| *x == 2).count() == 2 => H::Two,
-            _ if values.contains(&2) => H::One,
-            _ => H::High,
-        };
-        match a_rank.partial_cmp(&b_rank).unwrap() {
+        match hands[0].partial_cmp(&hands[1]).unwrap() {
             Ordering::Equal => {
-                for i in 0..a.0.len() {
-                    match a.0[i].cmp(&b.0[i]) {
+                for i in 0..a.len() {
+                    match a[i].cmp(&b[i]) {
                         Ordering::Equal => (),
                         _ => {
-                            let a_val = match a.0[i] {
-                                '2' => 0,
-                                '3' => 1,
-                                '4' => 2,
-                                '5' => 3,
-                                '6' => 4,
-                                '7' => 5,
-                                '8' => 6,
-                                '9' => 7,
-                                'T' => 8,
-                                'J' => 9,
-                                'Q' => 10,
-                                'K' => 11,
-                                'A' => 12,
-                                _ => unreachable!(),
-                            };
-                            let b_val = match b.0[i] {
-                                '2' => 0,
-                                '3' => 1,
-                                '4' => 2,
-                                '5' => 3,
-                                '6' => 4,
-                                '7' => 5,
-                                '8' => 6,
-                                '9' => 7,
-                                'T' => 8,
-                                'J' => 9,
-                                'Q' => 10,
-                                'K' => 11,
-                                'A' => 12,
-                                _ => unreachable!(),
-                            };
-                            return a_val.cmp(&b_val);
+                            let mut vals: [usize; 2] = [0; 2];
+                            for (k, v) in [a, b].iter().enumerate() {
+                                vals[k] = match v[i] {
+                                    '2' => 0,
+                                    '3' => 1,
+                                    '4' => 2,
+                                    '5' => 3,
+                                    '6' => 4,
+                                    '7' => 5,
+                                    '8' => 6,
+                                    '9' => 7,
+                                    'T' => 8,
+                                    'J' => 9,
+                                    'Q' => 10,
+                                    'K' => 11,
+                                    'A' => 12,
+                                    _ => unreachable!(),
+                                };
+                            }
+                            return vals[0].cmp(&vals[1]);
                         }
                     }
                 }
@@ -141,111 +110,69 @@ pub fn part_2() -> usize {
             )
         })
         .collect::<Vec<(Box<[char]>, usize)>>();
-    pairs.sort_unstable_by(|a, b| {
-        let mut k_map: HashMap<char, usize> = HashMap::with_capacity(17);
-        for char in a.0.iter() {
-            k_map.entry(*char).and_modify(|x| *x += 1).or_insert(1);
-        }
-
-        if let Some(j) = k_map.remove(&'J') {
-            match k_map.iter_mut().max_by_key(|x| *x.1) {
-                Some(max) => {
-                    *max.1 += j;
-                }
-                None => {
-                    k_map.insert('J', j);
-                }
-            }
-        }
-
-        let values: Vec<usize> = k_map.into_values().collect();
+    pairs.sort_unstable_by(|(a, _), (b, _)| {
         use HandType as H;
-        let a_rank: HandType = match values {
-            _ if values.contains(&5) => H::Five,
-            _ if values.contains(&4) => H::Four,
-            _ if values.contains(&3) => {
-                if values.contains(&2) {
-                    H::FullHouse
-                } else {
-                    H::Three
+        let mut hands: [H; 2] = [H::High, H::High];
+        for (k, v) in [a, b].iter().enumerate() {
+            let mut k_map: HashMap<char, usize> = HashMap::with_capacity(23);
+            for char in v.iter() {
+                k_map.entry(*char).and_modify(|x| *x += 1).or_insert(1);
+            }
+
+            if let Some(j) = k_map.remove(&'J') {
+                match k_map.iter_mut().max_by_key(|x| *x.1) {
+                    Some(max) => {
+                        *max.1 += j;
+                    }
+                    None => {
+                        k_map.insert('J', j);
+                    }
                 }
             }
-            _ if values.iter().filter(|&x| *x == 2).count() == 2 => H::Two,
-            _ if values.contains(&2) => H::One,
-            _ => H::High,
-        };
 
-        k_map = HashMap::with_capacity(17);
-
-        for char in b.0.iter() {
-            k_map.entry(*char).and_modify(|x| *x += 1).or_insert(1);
+            let values: Vec<usize> = k_map.into_values().collect();
+            hands[k] = match values {
+                _ if values.contains(&5) => H::Five,
+                _ if values.contains(&4) => H::Four,
+                _ if values.contains(&3) => {
+                    if values.contains(&2) {
+                        H::FullHouse
+                    } else {
+                        H::Three
+                    }
+                }
+                _ if values.iter().filter(|&x| *x == 2).count() == 2 => H::Two,
+                _ if values.contains(&2) => H::One,
+                _ => H::High,
+            };
         }
 
-        if let Some(j) = k_map.remove(&'J') {
-            match k_map.iter_mut().max_by_key(|x| *x.1) {
-                Some(max) => {
-                    *max.1 += j;
-                }
-                None => {
-                    k_map.insert('J', j);
-                }
-            }
-        }
-
-        let values: Vec<usize> = k_map.into_values().collect();
-        let b_rank: HandType = match values {
-            _ if values.contains(&5) => H::Five,
-            _ if values.contains(&4) => H::Four,
-            _ if values.contains(&3) => {
-                if values.contains(&2) {
-                    H::FullHouse
-                } else {
-                    H::Three
-                }
-            }
-            _ if values.iter().filter(|&x| *x == 2).count() == 2 => H::Two,
-            _ if values.contains(&2) => H::One,
-            _ => H::High,
-        };
-        match a_rank.partial_cmp(&b_rank).unwrap() {
+        match hands[0].partial_cmp(&hands[1]).unwrap() {
             Ordering::Equal => {
-                for i in 0..a.0.len() {
-                    match a.0[i].cmp(&b.0[i]) {
+                for i in 0..a.len() {
+                    match a[i].cmp(&b[i]) {
                         Ordering::Equal => (),
                         _ => {
-                            let a_val = match a.0[i] {
-                                'J' => 0,
-                                '2' => 1,
-                                '3' => 2,
-                                '4' => 3,
-                                '5' => 4,
-                                '6' => 5,
-                                '7' => 6,
-                                '8' => 7,
-                                '9' => 8,
-                                'T' => 9,
-                                'Q' => 10,
-                                'K' => 11,
-                                'A' => 12,
-                                _ => unreachable!(),
-                            };
-                            let b_val = match b.0[i] {
-                                'J' => 0,
-                                '2' => 1,
-                                '3' => 2,
-                                '4' => 3,
-                                '5' => 4,
-                                '6' => 5,
-                                '7' => 6,
-                                '8' => 7,
-                                '9' => 8,
-                                'T' => 9,
-                                'Q' => 10,
-                                'K' => 11,
-                                'A' => 12,
-                                _ => unreachable!(),
-                            };
-                            return a_val.cmp(&b_val);
+                            let mut vals: [usize; 2] = [0; 2];
+                            for (k, v) in [a, b].iter().enumerate() {
+                                vals[k] = match v[i] {
+                                    'J' => 0,
+                                    '2' => 1,
+                                    '3' => 2,
+                                    '4' => 3,
+                                    '5' => 4,
+                                    '6' => 5,
+                                    '7' => 6,
+                                    '8' => 7,
+                                    '9' => 8,
+                                    'T' => 9,
+                                    'Q' => 10,
+                                    'K' => 11,
+                                    'A' => 12,
+                                    _ => unreachable!(),
+                                };
+                            }
+                            return vals[0].cmp(&vals[1]);
                         }
                     }
                 }
