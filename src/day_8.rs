@@ -1,4 +1,7 @@
-use std::{collections::HashMap, fs::read_to_string};
+use std::{
+    collections::{HashMap, HashSet},
+    fs::read_to_string,
+};
 
 const TEST1: &str = "RL
 
@@ -97,10 +100,13 @@ pub fn part_2() -> usize {
         }
     }
 
-    let max = *steps.iter().max().unwrap();
-    let mut total = max;
-    while !steps.iter().all(|x| total % x == 0) {
-        total += max;
-    }
-    total
+    steps
+        .iter()
+        // Calculate prime factors of all paths in steps
+        .flat_map(|x| (2..*x).filter(|y| *x % *y == 0 && (2..*y).all(|z| *y % z != 0)))
+        // collect into hashset to remove duplicates
+        .collect::<HashSet<usize>>()
+        .iter()
+        // Find lcm by calculating product
+        .product::<usize>()
 }
